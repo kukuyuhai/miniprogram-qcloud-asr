@@ -1,11 +1,7 @@
 const Koa = require('koa')
 const app = new Koa()
 const bodyParser = require('koa-bodyparser')
-const ffmpeg = require('fluent-ffmpeg')
-const router = require('koa-router')({
-    prefix: '/weapp'
-})
-const multiparty = require('multiparty')
+
 const readChunk = require('read-chunk')
 const fileType = require('file-type')
 const shortid = require('shortid')
@@ -14,8 +10,11 @@ const path = require("path")
 var request = require('request');
 var config = require('./config')
 const CryptoJS = require('crypto-js');
+const resolveUploadFileFromRequest = require('./utils/util')
 
 app.use(bodyParser());
+
+const router = require('./routes')
 
 app
     .use(router.routes())
@@ -122,6 +121,8 @@ router.post('/voice', async ctx => {
 })
 
 
+
+
 function recognize(server_url, chunk, headers) {
     return new Promise((resolve, reject) => {
         // 签名密钥
@@ -168,22 +169,7 @@ function randomNum(minNum, maxNum) {
     }
 }
 
-/**
- * mp3 转 wav
- * @param {string} srcPath 源文件地址
- * @param {string} newPath 新文件地址
- */
-function convertMp3ToWav(srcPath, newPath) {
-    return new Promise((resolve, reject) => {
-        ffmpeg(srcPath)
-            .format('wav')
-            .on('error', reject)
-            .on('end', function () {
-                resolve(newPath)
-            })
-            .save(newPath)
-    })
-}
+
 
 function genRandomString(len) {
     let text = ''
@@ -197,24 +183,6 @@ function genRandomString(len) {
 }
 
 
-function resolveUploadFileFromRequest(request) {
-    const maxSize = 10
-
-    // 初始化 multiparty
-    const form = new multiparty.Form({
-        encoding: 'utf8',
-        maxFilesSize: maxSize * 1024 * 1024,
-        autoFiles: true,
-        uploadDir: path.resolve(__dirname + '/tmp')
-    })
-
-    return new Promise((resolve, reject) => {
-        // 从 req 读取文件
-        form.parse(request, (err, fields = {}, files = {}) => {
-            err ? reject(err) : resolve({ fields, files })
-        })
-    })
-}
 
 
 app.listen(3000, () => console.log('Example app listening on port 3000!'))
