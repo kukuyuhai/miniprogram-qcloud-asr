@@ -6,6 +6,7 @@ const path = require("path")
 var request = require('request');
 var config = require('../config')
 const CryptoJS = require('crypto-js');
+const resolveUploadFileFromRequest = require('./utils/util');
 
  module.exports = async ctx => {
     const { files, fields } = await resolveUploadFileFromRequest(ctx.req)

@@ -8,7 +8,6 @@ const router = require('./routes')
 
 app.use(bodyParser());
 
-const resolveUploadFileFromRequest = require('./utils/util')
 
 app
     .use(router.routes())
